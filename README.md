@@ -1,5 +1,16 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
+#Snapshots & Recording 
+
+#iOS
+https://github.com/Amitchaudhary9648/VisitHealth/assets/59361363/8ae1ee15-7c36-4589-999c-37dfa9d89142
+
+#Android
+[untitled.webm](https://github.com/Amitchaudhary9648/VisitHealth/assets/59361363/4fedcc26-2dc9-442f-bfbd-7f7c2c220fa1)
+
+
+
+
 # Getting Started
 
 >**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
