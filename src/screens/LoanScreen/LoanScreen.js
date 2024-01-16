@@ -1,36 +1,144 @@
-import { View, SafeAreaView, Text } from 'react-native'
-import React from 'react'
-import { s, vs, ms, mvs, ScaledSheet, scale, moderateScale } from 'react-native-size-matters';
+import { View, SafeAreaView, Text, TextInput, KeyboardAvoidingView, Platform, Pressable } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { ScaledSheet, scale, moderateScale } from 'react-native-size-matters';
 import Header from '../../components/Atoms/Header/Header';
 import { useTheme } from 'react-native-paper';
 import Icon from '../../components/Atoms/Icon/Icon';
-import CircularProgress from '../../components/Atoms/CircularProgress/CircularProgress';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import Toast from 'react-native-toast-message';
+import CustomButton from '../../components/Atoms/CustomButton/CustomButton';
+import { Circle } from 'react-native-svg';
+import { loanScreenConstants } from '../../constants/string';
 
 
 const LoanScreen = () => {
     const { colors, typography } = useTheme();
     const styles = makeStyles({ colors, typography });
+    const [progress, setProgress] = useState(0)
+    const [loanAmount, setLoanAmount] = useState('20000')
+    const [inputFocused, setInputFocussed] = useState(false)
+    const maxLoanAmount = 200000
+    const minLoanAmount = 50000
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        let percentage = (loanAmount / maxLoanAmount) * 100
+        setProgress(percentage)
+    }, [loanAmount])
+
+    const formatAmount = (amount) => {
+        return new Intl.NumberFormat('en-IN').format(amount)
+    };
+
+    const focusInput = () => {
+        setInputFocussed(true)
+        setTimeout(() => {
+            inputRef?.current?.focus();
+        }, 100)
+    }
+
+    const unfocusInput = () => {
+        setInputFocussed(false)
+        setTimeout(() => {
+            inputRef?.current?.focus();
+        }, 100)
+    }
+
+    const handleTextChange = (amount) => {
+        if (amount <= maxLoanAmount) {
+            setLoanAmount(amount)
+        }
+        else {
+            Toast.show({
+                type: 'info',
+                text1: `${loanScreenConstants.toastMessage}`,
+            });
+        }
+    }
+
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.paddingContainer}>
-                <Header title={"Loan Amount"} />
-            </View>
-            <View style={styles.horizontalLine}/>
-            <View style={styles.paddingContainer}>
-                <View style={styles.infoContainer}>
-                    <Icon 
-                        type={"foundation"}
-                        name={"info"}
-                        color={colors.infoIcon}
-                        size={moderateScale(12)}/>
-                    <Text style={styles.infoText}>Your loan amount may be split and transferred to your bank account and the hospital’s bank account. </Text>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1, justifyContent: 'space-between' }}
+            >
+                <View>
+                    <View style={styles.paddingContainer}>
+                        <Header title={loanScreenConstants.screenTitle} />
+                    </View>
+                    <View style={styles.horizontalLine} />
+                    <View style={styles.paddingContainer}>
+                        <View style={styles.infoContainer}>
+                            <Icon
+                                type={"foundation"}
+                                name={"info"}
+                                color={colors.infoIcon}
+                                size={moderateScale(12)} />
+                            <Text style={styles.infoText}>{loanScreenConstants.loanInfo}</Text>
+                        </View>
+                        <Text style={styles.selectLoanText}>{loanScreenConstants.heading1}</Text>
+                        <Text style={styles.eligibilityText}>{loanScreenConstants.heading2}<Text style={{ color: colors.primary }}>₹{formatAmount(maxLoanAmount)}</Text></Text>
+                        <View style={styles.progressContainer}>
+                            <AnimatedCircularProgress
+                                size={moderateScale(220)}
+                                width={10} c
+                                fill={progress}
+                                tintColor={colors.primary}
+                                onAnimationComplete={() => console.log('onAnimationComplete')}
+                                backgroundColor={colors.progressBackground}
+                                lineCap={'round'}
+                                rotation={0}
+                                padding={moderateScale(15)}
+                                renderCap={({ center }) => (
+                                    <React.Fragment>
+                                        {/* White circle */}
+                                        <Circle cx={center.x} cy={center.y} r="20" fill={colors.capOuter} />
+                                        {/* Blue circle inside white circle */}
+                                        <Circle cx={center.x} cy={center.y} r="10" fill={colors.capInner} />
+                                    </React.Fragment>
+                                )}
+                            />
+                            <View style={styles.loanInputContainer}>
+                                <Text style={styles.loanAmountText}>Loan Amount</Text>
+                                <View style={styles.inputContainer}>
+                                    {inputFocused ? (
+                                        <TextInput
+                                            ref={inputRef}
+                                            style={[styles.input, { paddingVertical: moderateScale(6) }]}
+                                            keyboardType='numeric'
+                                            cursorColor={colors.infoIcon}
+                                            textAlign={'center'}
+                                            value={(loanAmount)}
+                                            onFocus={() => { }}
+                                            onChangeText={(amount) => {
+                                                handleTextChange(amount)
+                                            }}
+                                            returnKeyType='done'
+                                            onSubmitEditing={unfocusInput}
+                                        />
+                                    ) : (
+                                        <Pressable
+                                            onPress={focusInput}
+                                            style={[styles.input, { paddingVertical: moderateScale(6), paddingHorizontal: moderateScale(10) }]}>
+                                            <Text style={styles.currencyText}>{"₹ " + formatAmount(loanAmount)}</Text>
+                                        </Pressable>
+                                    )}
+
+                                </View>
+                            </View>
+                        </View>
+                    </View>
                 </View>
-                <Text style={styles.selectLoanText}>Select the required loan amount</Text>
-                <Text style={styles.eligibilityText}>You’re Eligible for a loan of up to <Text style={{color: colors.primary}}>₹2,00,000</Text></Text>
-                <View style={styles.progressContainer}>
-                <CircularProgress progress={50} size={moderateScale(200)}/>
+                <View style={styles.bottomContainer}>
+                    <View style={[styles.horizontalLine, { marginTop: 0 }]} />
+                    <CustomButton
+                        title={"Submit"}
+                        buttonStyle={{ marginVertical: moderateScale(30) }}
+                        onPress={() => { }}
+                        disabled={loanAmount >= minLoanAmount ? false : true}
+                    />
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     )
 }
@@ -39,43 +147,85 @@ const makeStyles = ({ colors, typography }) =>
     ScaledSheet.create({
         container: {
             flex: 1,
-            backgroundColor: '#fff'
+            backgroundColor: '#fff',
         },
         paddingContainer: {
             paddingHorizontal: scale(16),
             marginTop: moderateScale(10)
         },
-        horizontalLine:{
+        horizontalLine: {
             width: '100%',
             height: moderateScale(1),
             backgroundColor: colors.horizontalLine,
             marginTop: moderateScale(18)
         },
-        infoContainer:{
+        infoContainer: {
             backgroundColor: '#EFF5FF',
             paddingHorizontal: moderateScale(15),
             paddingVertical: moderateScale(8),
             borderRadius: moderateScale(8),
             flexDirection: 'row'
         },
-        infoText:{
+        infoText: {
             ...typography.info,
             color: colors.infoText,
             marginLeft: moderateScale(5)
         },
-        selectLoanText:{
+        selectLoanText: {
             marginTop: moderateScale(28),
             ...typography.heading,
             color: colors.heading
         },
-        eligibilityText:{
+        eligibilityText: {
             marginTop: moderateScale(4),
             ...typography.subHeading,
             color: colors.infoText
         },
-        progressContainer:{
-            marginTop: moderateScale(40),
+        progressContainer: {
+            marginTop: moderateScale(80),
+            alignItems: 'center',
+        },
+        loanInputContainer: {
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            justifyContent: 'center',
             alignItems: 'center'
+        },
+        inputContainer: {
+            backgroundColor: '#F8F8F8',
+            borderRadius: moderateScale(12),
+            minWidth: moderateScale(130),
+            paddingTop: Platform.OS === "ios" ? moderateScale(6) : moderateScale(0),
+            paddingBottom: Platform.OS === 'ios' ? moderateScale(6) : moderateScale(0),
+            flexDirection: 'row',
+            justifyContent: 'center',
+            paddingHorizontal: moderateScale(0)
+        },
+        currencyText: {
+            ...typography.inputLoanAmount,
+            color: "#000"
+        },
+        loanAmountText: {
+            ...typography.body1,
+            color: colors.text1,
+            marginBottom: moderateScale(4)
+        },
+        input: {
+            color: '#0F0B28',
+            ...typography.inputLoanAmount,
+        },
+        bottomContainer: {
+            backgroundColor: '#FEFEFE',
+            elevation: 5, // For Android
+            ...Platform.select({
+                ios: {
+                    shadowColor: 'rgba(0, 0, 0, 0.05)',
+                    shadowOffset: { width: 0, height: -2 },
+                    shadowOpacity: 1,
+                    shadowRadius: 10,
+                },
+            }),
         }
     })
 
