@@ -1,4 +1,4 @@
-import { View, SafeAreaView, Text, TextInput, KeyboardAvoidingView, Platform, Pressable } from 'react-native'
+import { View, SafeAreaView, Text, TextInput, KeyboardAvoidingView, Platform, Pressable, PanResponder } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { ScaledSheet, scale, moderateScale } from 'react-native-size-matters';
 import Header from '../../components/Atoms/Header/Header';
@@ -56,6 +56,23 @@ const LoanScreen = () => {
         }
     }
 
+    const panResponderCap = PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderMove: (event, gestureState) => {
+            const { dx, dy } = gestureState;
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            const normalizedAngle = angle < 0 ? 360 + angle : angle;
+
+            const newProgress = (normalizedAngle / 360) * 100; // Map angle to progress value (0 to 100)
+
+            // Update progress value and trigger re-render
+            let value = maxLoanAmount * (newProgress/100)
+            setLoanAmount(value.toFixed())
+            setProgress(newProgress);
+        },
+    });
+
+
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
@@ -78,10 +95,10 @@ const LoanScreen = () => {
                         </View>
                         <Text style={styles.selectLoanText}>{loanScreenConstants.heading1}</Text>
                         <Text style={styles.eligibilityText}>{loanScreenConstants.heading2}<Text style={{ color: colors.primary }}>₹{formatAmount(maxLoanAmount)}</Text></Text>
-                        <View style={styles.progressContainer}>
+                        <View style={styles.progressContainer} >
                             <AnimatedCircularProgress
                                 size={moderateScale(220)}
-                                width={10} c
+                                width={10}
                                 fill={progress}
                                 tintColor={colors.primary}
                                 onAnimationComplete={() => console.log('onAnimationComplete')}
@@ -91,10 +108,16 @@ const LoanScreen = () => {
                                 padding={moderateScale(15)}
                                 renderCap={({ center }) => (
                                     <React.Fragment>
-                                        {/* White circle */}
-                                        <Circle cx={center.x} cy={center.y} r="20" fill={colors.capOuter} />
-                                        {/* Blue circle inside white circle */}
-                                        <Circle cx={center.x} cy={center.y} r="10" fill={colors.capInner} />
+                                        {/* Outer circle */}
+                                        <Circle
+                                            cx={center.x}
+                                            cy={center.y}
+                                            r="20"
+                                            fill={colors.capOuter}
+                                            {...panResponderCap.panHandlers}
+                                        />
+                                        {/* Inner circle */}
+                                        <Circle {...panResponderCap.panHandlers} cx={center.x} cy={center.y} r="10" fill={colors.capInner} />
                                     </React.Fragment>
                                 )}
                             />
