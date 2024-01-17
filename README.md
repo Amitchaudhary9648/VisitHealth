@@ -4,9 +4,19 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 #iOS
 https://github.com/Amitchaudhary9648/VisitHealth/assets/59361363/8ae1ee15-7c36-4589-999c-37dfa9d89142
+#Loan Value change based on renderCap movement for iOS
+
+https://github.com/Amitchaudhary9648/VisitHealth/assets/59361363/6c1fe4a4-70a5-48b9-9903-054ace4338f2
+
+
 
 #Android
 [untitled.webm](https://github.com/Amitchaudhary9648/VisitHealth/assets/59361363/4fedcc26-2dc9-442f-bfbd-7f7c2c220fa1)
+
+#Loan Value change based on renderCap movement for Android
+[untitled.webm](https://github.com/Amitchaudhary9648/VisitHealth/assets/59361363/d36e9bb5-6823-4ab0-824c-d35bd22a87ed)
+
+
 
 
 
