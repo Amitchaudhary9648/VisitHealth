@@ -9,17 +9,19 @@ import Toast from 'react-native-toast-message';
 import CustomButton from '../../components/Atoms/CustomButton/CustomButton';
 import { Circle } from 'react-native-svg';
 import { loanScreenConstants } from '../../constants/string';
+import CongratsScreen from '../CongratsScreen/CongratsScreen';
 
 
 const LoanScreen = () => {
     const { colors, typography } = useTheme();
     const styles = makeStyles({ colors, typography });
     const [progress, setProgress] = useState(0)
-    const [loanAmount, setLoanAmount] = useState('20000')
+    const [loanAmount, setLoanAmount] = useState('30000')
     const [inputFocused, setInputFocussed] = useState(false)
     const maxLoanAmount = 200000
     const minLoanAmount = 50000
     const inputRef = useRef(null);
+    const [showCongrats, setShowCongrats] = useState(false)
 
     useEffect(() => {
         let percentage = (loanAmount / maxLoanAmount) * 100
@@ -62,15 +64,17 @@ const LoanScreen = () => {
             const { dx, dy } = gestureState;
             const angle = Math.atan2(dy, dx) * (180 / Math.PI);
             const normalizedAngle = angle < 0 ? 360 + angle : angle;
-
             const newProgress = (normalizedAngle / 360) * 100; // Map angle to progress value (0 to 100)
-
             // Update progress value and trigger re-render
-            let value = maxLoanAmount * (newProgress/100)
+            let value = maxLoanAmount * (newProgress / 100)
             setLoanAmount(value.toFixed())
             setProgress(newProgress);
         },
     });
+
+    const submit = () => {
+        setShowCongrats(true)
+    }
 
 
     return (
@@ -154,12 +158,16 @@ const LoanScreen = () => {
                 </View>
                 <View style={styles.bottomContainer}>
                     <View style={[styles.horizontalLine, { marginTop: 0 }]} />
-                    <CustomButton
-                        title={"Submit"}
-                        buttonStyle={{ marginVertical: moderateScale(30) }}
-                        onPress={() => { }}
-                        disabled={loanAmount >= minLoanAmount ? false : true}
-                    />
+                    {showCongrats ? (
+                        <CongratsScreen />
+                    ) : (
+                        <CustomButton
+                            title={"Submit"}
+                            buttonStyle={{ marginVertical: moderateScale(30) }}
+                            onPress={() => submit()}
+                            disabled={loanAmount >= minLoanAmount ? false : true}
+                        />
+                    )}
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
